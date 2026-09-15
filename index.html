@@ -1,0 +1,1016 @@
+<!doctype html>
+<title>Filou et les Sons Malins</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F6F5C">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Filou">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --bg: #FFF4DE;
+    --bg-elevated: #FFFFFF;
+    --bg-sunken: #FBEAC8;
+    --ink: #2B2118;
+    --ink-soft: #7A6A55;
+    --primary: #1F6F5C;
+    --primary-ink: #FFFFFF;
+    --accent: #FF6F3C;
+    --success: #4C8B2B;
+    --gold: #E3A008;
+    --line: #E8D9BC;
+    --locked: #CBBFA1;
+    --locked-ink: #FFFFFF;
+    --danger: #D65656;
+    --shadow: rgba(60, 40, 10, 0.18);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg: #1A1510;
+      --bg-elevated: #262019;
+      --bg-sunken: #221B14;
+      --ink: #F5EBDD;
+      --ink-soft: #C4B39B;
+      --primary: #45B695;
+      --primary-ink: #0F1B17;
+      --accent: #FF8F5C;
+      --success: #86C25C;
+      --gold: #FFCB4D;
+      --line: #3A3226;
+      --locked: #4A4236;
+      --locked-ink: #C4B39B;
+      --danger: #FF8080;
+      --shadow: rgba(0,0,0,0.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg: #1A1510;
+    --bg-elevated: #262019;
+    --bg-sunken: #221B14;
+    --ink: #F5EBDD;
+    --ink-soft: #C4B39B;
+    --primary: #45B695;
+    --primary-ink: #0F1B17;
+    --accent: #FF8F5C;
+    --success: #86C25C;
+    --gold: #FFCB4D;
+    --line: #3A3226;
+    --locked: #4A4236;
+    --locked-ink: #C4B39B;
+    --danger: #FF8080;
+    --shadow: rgba(0,0,0,0.45);
+  }
+  *{ box-sizing: border-box; }
+  [hidden]{ display:none !important; }
+  html, body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Nunito", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{ max-width:100%; }
+  h1,h2,h3{ font-family:"Baloo 2", "Nunito", sans-serif; text-wrap:balance; margin:0; }
+  button{ font-family:inherit; }
+  button:focus-visible, [tabindex]:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  svg[aria-label="Filou le renard"]{ width:100%; height:100%; display:block; }
+
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  #app{ min-height:100%; display:flex; flex-direction:column; padding-inline:16px; padding-block: 12px 28px; max-width: 560px; margin:0 auto; }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top: env(safe-area-inset-top, 0px);
+    z-index:5;
+    display:flex; align-items:center; gap:10px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    padding-block:10px;
+    margin-bottom: 6px;
+  }
+  .mascot-badge{ width:44px; height:44px; flex:none; }
+  .stat-pill{
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    background:var(--bg-elevated); border:1px solid var(--line);
+    border-radius:999px; padding:6px 12px; font-weight:800; font-size:.95rem;
+    box-shadow: 0 2px 0 var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Gate ---------- */
+  @keyframes bounce{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(10px);} }
+
+  /* ---------- Map / trail ---------- */
+  .trail{ position:relative; padding-block: 10px 8px; }
+  .trail-line{
+    position:absolute; left:50%; top:8px; bottom:8px; width:6px;
+    transform:translateX(-50%);
+    background: repeating-linear-gradient(to bottom, var(--line) 0 10px, transparent 10px 20px);
+    border-radius:4px; z-index:0;
+  }
+  .trail-node-row{ position:relative; z-index:1; display:flex; margin-block:2px; }
+  .trail-node-row.side-l{ justify-content:flex-start; }
+  .trail-node-row.side-r{ justify-content:flex-end; }
+  .trail-node-row.side-c{ justify-content:center; }
+  .node{
+    width:min(30vw, 116px); display:flex; flex-direction:column; align-items:center; gap:4px;
+    background:none; border:none; padding:8px 4px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .node:disabled{ cursor:default; }
+  .node-circle{
+    width:68px; height:68px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Baloo 2"; font-weight:800; font-size:1.3rem;
+    color:var(--primary-ink);
+    box-shadow: 0 4px 0 var(--shadow);
+    border:3px solid color-mix(in srgb, var(--bg) 40%, transparent);
+    transition: transform .12s ease;
+  }
+  .node:active .node-circle{ transform:translateY(3px); box-shadow:0 1px 0 var(--shadow); }
+  .node.locked .node-circle{ background:var(--locked); color:var(--locked-ink); }
+  .node-stars{ font-size:.8rem; letter-spacing:1px; }
+  .node-lock{ font-size:1.4rem; }
+
+  /* ---------- Panels (intro / exercise / complete) ---------- */
+  .panel{
+    background:var(--bg-elevated); border:1px solid var(--line); border-radius:24px;
+    padding:22px 18px 20px; box-shadow:0 4px 0 var(--line);
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .back-row{ display:flex; align-items:center; gap:10px; margin-bottom:2px; }
+  .icon-btn{
+    background:var(--bg-sunken); border:1px solid var(--line); border-radius:12px;
+    width:38px; height:38px; flex:none; display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; color:var(--ink); cursor:pointer;
+  }
+
+  .progress-dots{ display:flex; gap:7px; justify-content:center; align-items:center; }
+  .progress-dots span{ width:10px; height:10px; border-radius:50%; background:var(--line); transition: all .2s ease; }
+  .progress-dots span.done{ background:var(--success); }
+  .progress-dots span.current{ background:var(--accent); transform:scale(1.35); }
+
+  .grapheme-hero{ text-align:center; padding: 10px 0 4px; }
+  .grapheme-big{
+    font-family:"Baloo 2"; font-weight:800; font-size:4rem; letter-spacing:2px;
+    color:var(--primary);
+    display:inline-flex; gap:2px;
+  }
+  .grapheme-letter{ display:inline-block; padding:4px 10px; border-radius:16px; }
+  .example-word-row{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:8px; flex-wrap:wrap; }
+  .example-emoji{ font-size:3rem; }
+  .example-word{ font-family:"Baloo 2"; font-size:1.7rem; font-weight:700; }
+  .example-word mark{ background: color-mix(in srgb, var(--accent) 35%, transparent); color:inherit; border-radius:8px; padding:0 3px; }
+
+  .icon-btn-lg{
+    border:none; border-radius:20px; font-size:2.2rem; line-height:1;
+    padding:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 var(--shadow); transition: transform .08s ease; width:100%;
+  }
+  .icon-btn-lg:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shadow); }
+  .icon-btn-lg.primary{ background:var(--accent); color:#fff; }
+  .icon-btn-lg.secondary{ background:var(--bg-sunken); color:var(--ink); border:1px solid var(--line); box-shadow:0 4px 0 var(--line); }
+  .icon-btn-lg.ghost{ background:transparent; color:var(--primary); box-shadow:none; width:auto; margin:0 auto; padding:8px 16px; font-size:1.6rem; }
+  .icon-btn-lg[disabled]{ opacity:.5; cursor:default; }
+
+  .listen-btn{
+    align-self:center; display:flex; align-items:center; justify-content:center;
+    background:var(--accent); border:none; color:#fff;
+    border-radius:999px; width:64px; height:64px; font-size:1.9rem; cursor:pointer;
+    box-shadow:0 4px 0 var(--shadow);
+  }
+  .listen-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--shadow); }
+
+  .options-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+  .option-btn{
+    background:var(--bg-sunken); border:2px solid var(--line); border-radius:16px;
+    padding:16px; font-size:1.1rem; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:12px; color:var(--ink);
+  }
+  .option-btn .opt-grapheme{ font-family:"Baloo 2"; font-size:1.8rem; }
+  .option-btn.correct{ background: color-mix(in srgb, var(--success) 22%, var(--bg-elevated)); border-color:var(--success); }
+  .option-btn.incorrect{ background: color-mix(in srgb, var(--danger) 18%, var(--bg-elevated)); border-color:var(--danger); }
+  .option-btn:disabled{ cursor:default; }
+
+  .letters-row{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:10px 0; }
+  .letter-tile{
+    width:48px; height:54px; border-radius:12px; border:2px solid var(--line);
+    background:var(--bg-sunken); color:var(--ink);
+    font-family:"Baloo 2"; font-weight:800; font-size:1.5rem;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .letter-tile.selected{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .letter-tile.hint{ background: color-mix(in srgb, var(--gold) 40%, var(--bg-sunken)); border-color:var(--gold); }
+  .letter-tile.locked-correct{ background:var(--success); color:#fff; border-color:var(--success); cursor:default; }
+
+  .feedback-bubble{ display:flex; align-items:center; justify-content:center; padding:6px 14px; }
+  .feedback-emoji{ font-size:2.4rem; }
+
+  /* Complete screen */
+  .stars-row{ display:flex; justify-content:center; gap:10px; font-size:2.8rem; padding:6px 0; }
+  .stars-row span{ opacity:.25; transform:scale(.7); transition: all .25s ease; }
+  .stars-row span.lit{ opacity:1; transform:scale(1); }
+  .coin-gain{ text-align:center; font-family:"Baloo 2"; font-weight:800; color:var(--gold); font-size:1.2rem; font-variant-numeric: tabular-nums; }
+
+  /* Confetti */
+  #confetti-layer{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:40; }
+  .confetto{ position:absolute; top:-10px; width:9px; height:14px; border-radius:2px; animation: fall linear forwards; }
+  @keyframes fall{ to{ transform: translateY(115vh) rotate(540deg); opacity:.9; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .icon-btn-lg, .node-circle, .letter-tile, .confetto, [style*="bounce"]{ transition:none !important; animation:none !important; }
+  }
+</style>
+
+<div id="app"></div>
+<div id="confetti-layer" aria-hidden="true"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= DATA ================= */
+  var LEVEL_HUES = ["#1F6F5C", "#FF6F3C", "#B4790A", "#4C8B2B", "#7A5CC0"];
+  function levelColor(i){ return LEVEL_HUES[i % LEVEL_HUES.length]; }
+
+  var LEVELS = [
+    { g:"ou", title:"Le son OU", words:[
+        {w:"loup", e:"🐺"}, {w:"hibou", e:"🦉"}, {w:"genou", e:"🦵"}, {w:"bijou", e:"💍"}, {w:"mouche", e:"🪰"}
+      ], distractors:["on","au"] },
+    { g:"on", title:"Le son ON", words:[
+        {w:"mouton", e:"🐑"}, {w:"bonbon", e:"🍬"}, {w:"ballon", e:"🎈"}, {w:"poisson", e:"🐟"}, {w:"camion", e:"🚛"}
+      ], distractors:["an","ou"] },
+    { g:"an", title:"Le son AN", words:[
+        {w:"maman", e:"👩"}, {w:"éléphant", e:"🐘"}, {w:"gant", e:"🧤"}, {w:"banane", e:"🍌"}, {w:"orange", e:"🍊"}
+      ], distractors:["on","in"] },
+    { g:"in", title:"Le son IN", words:[
+        {w:"lapin", e:"🐰"}, {w:"sapin", e:"🎄"}, {w:"matin", e:"🌅"}, {w:"dessin", e:"🎨"}, {w:"requin", e:"🦈"}
+      ], distractors:["an","ill"] },
+    { g:"ch", title:"Le son CH", words:[
+        {w:"chat", e:"🐱"}, {w:"chien", e:"🐶"}, {w:"cheval", e:"🐴"}, {w:"chapeau", e:"🎩"}, {w:"vache", e:"🐄"}
+      ], distractors:["gn","ph"] },
+    { g:"gn", title:"Le son GN", words:[
+        {w:"montagne", e:"⛰️"}, {w:"araignée", e:"🕷️"}, {w:"champignon", e:"🍄"}, {w:"agneau", e:"🐑"}, {w:"vigne", e:"🍇"}
+      ], distractors:["ch","ill"] },
+    { g:"eu", title:"Le son EU", words:[
+        {w:"feu", e:"🔥"}, {w:"jeu", e:"🎲"}, {w:"bleu", e:"🔵"}, {w:"pneu", e:"🛞"}, {w:"neuf", e:"9️⃣"}
+      ], distractors:["ou","oi"] },
+    { g:"oi", title:"Le son OI", words:[
+        {w:"roi", e:"👑"}, {w:"noix", e:"🌰"}, {w:"oiseau", e:"🐦"}, {w:"poire", e:"🍐"}, {w:"boite", e:"🎁"}
+      ], distractors:["ai","eu"] },
+    { g:"ai", title:"Le son AI", words:[
+        {w:"lait", e:"🥛"}, {w:"fraise", e:"🍓"}, {w:"maison", e:"🏠"}, {w:"balai", e:"🧹"}, {w:"laine", e:"🧶"}
+      ], distractors:["oi","au"] },
+    { g:"au", title:"Le son AU", words:[
+        {w:"jaune", e:"🟡"}, {w:"auto", e:"🚗"}, {w:"gauche", e:"⬅️"}, {w:"saut", e:"🦘"}
+      ], distractors:["ou","eau"] },
+    { g:"eau", title:"Le son EAU", words:[
+        {w:"bateau", e:"🚢"}, {w:"gateau", e:"🎂"}, {w:"chapeau", e:"🎩"}, {w:"oiseau", e:"🐦"}, {w:"rideau", e:"🪟"}
+      ], distractors:["au","ai"] },
+    { g:"qu", title:"Le son QU", words:[
+        {w:"question", e:"❓"}, {w:"quatre", e:"4️⃣"}, {w:"quille", e:"🎳"}, {w:"moustique", e:"🦟"}, {w:"perroquet", e:"🦜"}
+      ], distractors:["ch","gn"] },
+    { g:"ph", title:"Le son PH", words:[
+        {w:"téléphone", e:"📞"}, {w:"éléphant", e:"🐘"}, {w:"photo", e:"📸"}, {w:"phoque", e:"🦭"}, {w:"pharmacie", e:"💊"}
+      ], distractors:["ch","qu"] },
+    { g:"ill", title:"Le son ILLE", words:[
+        {w:"fille", e:"👧"}, {w:"famille", e:"👨‍👩‍👧‍👦"}, {w:"grenouille", e:"🐸"}, {w:"papillon", e:"🦋"}, {w:"oreille", e:"👂"}
+      ], distractors:["in","gn"] }
+  ];
+
+  function targetRange(word, g){
+    var i = word.toLowerCase().indexOf(g);
+    if(i < 0) i = 0;
+    return { start:i, end:i+g.length-1 };
+  }
+
+  /* ================= STATE ================= */
+  var STORAGE_KEY = "filouLitState_v3";
+  function defaultState(){
+    return { unlocked:1, stars:{}, coins:0 };
+  }
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && typeof parsed.unlocked === "number") return parsed;
+      }
+    }catch(e){}
+    return defaultState();
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  /* ================= SPEECH ================= */
+  var frVoice = null;
+  function pickVoice(){
+    if(!("speechSynthesis" in window)) return;
+    var voices = speechSynthesis.getVoices();
+    frVoice = voices.find(function(v){ return v.lang === "fr-FR"; })
+      || voices.find(function(v){ return v.lang && v.lang.indexOf("fr") === 0; })
+      || null;
+  }
+  if("speechSynthesis" in window){
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+  var TTS_OK = "speechSynthesis" in window;
+
+  // Chain TTS utterances via onend (queueing several speak() calls at once
+  // is unreliable on Chrome — later ones can be silently dropped).
+  function ttsChain(texts){
+    if(!TTS_OK || !texts.length) return;
+    try{ speechSynthesis.cancel(); }catch(e){}
+    function playIdx(i){
+      if(i >= texts.length) return;
+      try{
+        var u = new SpeechSynthesisUtterance(texts[i]);
+        u.lang = "fr-FR";
+        if(frVoice) u.voice = frVoice;
+        u.rate = 0.82;
+        u.pitch = 1.05;
+        u.onend = function(){ playIdx(i+1); };
+        u.onerror = function(){ playIdx(i+1); };
+        speechSynthesis.speak(u);
+      }catch(e){ playIdx(i+1); }
+    }
+    playIdx(0);
+  }
+  function speakSequence(parts){ ttsChain(parts); }
+  function speak(text){ ttsChain([text]); }
+
+  /* ---- App-wide activity log, shown on the debug screen (no devtools needed) ---- */
+  var APP_LOG = [];
+  window.APP_LOG = APP_LOG;
+  function alog(s){
+    var t = new Date();
+    var ts = ("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2)+":"+("0"+t.getSeconds()).slice(-2)+"."+("00"+t.getMilliseconds()).slice(-3);
+    APP_LOG.push(ts + "  " + s);
+    if(APP_LOG.length > 300) APP_LOG.shift();
+  }
+  window.addEventListener("error", function(ev){
+    alog("JS ERROR: " + ev.message + " @ " + ev.filename + ":" + ev.lineno);
+  });
+  window.addEventListener("unhandledrejection", function(ev){
+    alog("PROMISE REJETÉE non gérée: " + (ev.reason && (ev.reason.message || ev.reason)));
+  });
+  alog("app démarrée");
+
+  /* ---- Recorded-voice clips (tried first; TTS is only a per-clip fallback) ---- */
+  function slug(s){
+    try{
+      return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    }catch(e){ return s.toLowerCase(); }
+  }
+  function wordKey(w){ return "word-" + slug(w); }
+  function graphemeKey(g){ return "grapheme-" + g; }
+
+  // Tries to play audio/<key>.mp3; resolves on success, rejects on any
+  // failure (404, decode error, blocked, or simply taking too long).
+  function playAudioClip(key){
+    alog("playAudioClip(\"" + key + "\") appelé");
+    return new Promise(function(resolve, reject){
+      try{
+        var a = new Audio("audio/" + key + ".mp3");
+        var settled = false;
+        function ok(){ if(settled) return; settled = true; alog("  -> \"" + key + "\" ENDED (succès)"); resolve(); }
+        function fail(reason){ if(settled) return; settled = true; alog("  -> \"" + key + "\" ÉCHEC (" + reason + ")"); reject(); }
+        a.addEventListener("ended", ok);
+        a.addEventListener("error", function(){
+          var err = a.error;
+          var codes = {1:"ABORTED",2:"NETWORK",3:"DECODE",4:"SRC_NOT_SUPPORTED"};
+          fail("error event, code=" + (err && err.code) + "/" + (err && codes[err.code]));
+        });
+        setTimeout(function(){ fail("timeout 6s"); }, 6000);
+        var p = a.play();
+        alog("  -> \"" + key + "\" play() appelé, promesse=" + (p ? "oui" : "non"));
+        if(p && p.then){
+          p.then(function(){ alog("  -> \"" + key + "\" play() promesse résolue"); })
+           .catch(function(err){ fail("play() rejetée: " + (err && (err.name + " " + err.message))); });
+        }
+      }catch(e){ alog("  -> \"" + key + "\" EXCEPTION: " + e); reject(); }
+    });
+  }
+
+  function speakKey(key, fallbackText){
+    alog("speakKey(\"" + key + "\")");
+    playAudioClip(key).catch(function(){ alog("  -> repli TTS: \"" + fallbackText + "\""); speak(fallbackText); });
+  }
+
+  // items: [{key, fallback}, ...] — plays each recorded clip in turn;
+  // any clip that fails falls back to TTS for that item only, then continues.
+  function speakKeySequence(items){
+    alog("speakKeySequence([" + items.map(function(it){return it.key;}).join(", ") + "])");
+    function step(i){
+      if(i >= items.length) return;
+      var it = items[i];
+      playAudioClip(it.key).then(function(){
+        step(i+1);
+      }).catch(function(){
+        alog("  -> repli TTS: \"" + it.fallback + "\"");
+        speak(it.fallback);
+        setTimeout(function(){ step(i+1); }, 450);
+      });
+    }
+    step(0);
+  }
+
+  /* ================= MASCOT ================= */
+  function mascotSVG(mood){
+    // mood: idle | happy | oops
+    var mouth, eye;
+    if(mood === "happy"){
+      mouth = '<path d="M36 62 Q50 76 64 62" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>';
+      eye = '<path d="M32 46 Q37 41 42 46" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M58 46 Q63 41 68 46" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>';
+    } else if(mood === "oops"){
+      mouth = '<path d="M40 66 Q50 58 60 66" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>';
+      eye = '<circle cx="37" cy="46" r="4" fill="#2B2118"/><circle cx="63" cy="46" r="4" fill="#2B2118"/>';
+    } else {
+      mouth = '<path d="M40 60 Q50 68 60 60" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>';
+      eye = '<circle cx="37" cy="45" r="4.5" fill="#2B2118"/><circle cx="63" cy="45" r="4.5" fill="#2B2118"/>';
+    }
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Filou le renard">' +
+      '<path d="M20 30 L32 8 L42 28 Z" fill="#FF6F3C"/>' +
+      '<path d="M80 30 L68 8 L58 28 Z" fill="#FF6F3C"/>' +
+      '<path d="M25 33 L34 15 L40 30 Z" fill="#FFD8B8"/>' +
+      '<path d="M75 33 L66 15 L60 30 Z" fill="#FFD8B8"/>' +
+      '<ellipse cx="50" cy="52" rx="34" ry="30" fill="#FF6F3C"/>' +
+      '<path d="M50 40 Q68 46 66 66 Q58 78 50 78 Q42 78 34 66 Q32 46 50 40 Z" fill="#FFF6EC"/>' +
+      eye +
+      '<path d="M50 52 L45 58 L55 58 Z" fill="#2B2118"/>' +
+      mouth +
+      '</svg>';
+  }
+
+  /* ================= APP / RENDER ================= */
+  var app = document.getElementById("app");
+  var screen = { name:"gate" };
+  var audioUnlocked = false;
+  var greeted = false;
+
+  function setScreen(next){ screen = next; render(); window.scrollTo(0,0); }
+
+  function el(html){
+    var t = document.createElement("template");
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
+  function starsFor(levelIdx){ return state.stars[levelIdx] || 0; }
+
+  function render(){
+    app.innerHTML = "";
+    if(screen.name === "gate"){
+      app.appendChild(gateView());
+      return;
+    }
+    app.appendChild(topBar());
+    if(screen.name === "map") app.appendChild(mapView());
+    else if(screen.name === "intro") app.appendChild(introView(screen.levelIdx));
+    else if(screen.name === "exercise") app.appendChild(exerciseView());
+    else if(screen.name === "complete") app.appendChild(completeView());
+    else if(screen.name === "debug") app.appendChild(debugView());
+    if(screen.name !== "debug") narrateForScreen();
+  }
+
+  function topBar(){
+    var bar = el('<div class="topbar"></div>');
+    var mascotBtn = document.createElement("button");
+    mascotBtn.className = "mascot-badge";
+    mascotBtn.style.cssText = "background:none;border:none;padding:0;cursor:pointer;";
+    mascotBtn.setAttribute("aria-label", "Écouter Filou");
+    mascotBtn.innerHTML = mascotSVG("idle");
+    mascotBtn.addEventListener("click", function(){ narrateForScreen(); });
+    bar.appendChild(mascotBtn);
+    bar.appendChild(el('<div class="sr-only">Filou et les Sons Malins</div>'));
+    var coins = el('<div class="stat-pill">🪙 <span>' + state.coins + '</span></div>');
+    bar.appendChild(coins);
+    var debugBtn = el('<button class="icon-btn" aria-label="Diagnostic" style="margin-left:8px;">🔧</button>');
+    debugBtn.addEventListener("click", function(){ setScreen({ name:"debug" }); });
+    bar.appendChild(debugBtn);
+    return bar;
+  }
+
+  /* ---------- DEBUG (temporary diagnostic tool) ---------- */
+  function debugView(){
+    var panel = el('<div class="panel"></div>');
+    var back = el('<div class="back-row"><button class="icon-btn" aria-label="Retour">←</button></div>');
+    back.querySelector("button").addEventListener("click", function(){ setScreen({ name:"map" }); });
+    panel.appendChild(back);
+
+    panel.appendChild(el('<div style="font-weight:800; font-family:\'Baloo 2\';">Journal de l’appli</div>'));
+    var logOut = el('<pre style="white-space:pre-wrap; word-break:break-word; background:var(--bg-sunken); border:1px solid var(--line); border-radius:12px; padding:12px; font-size:.72rem; line-height:1.5; max-height:32vh; overflow:auto;"></pre>');
+    logOut.textContent = APP_LOG.join("\n");
+    panel.appendChild(logOut);
+    var refreshBtn = el('<button class="icon-btn-lg secondary" style="font-size:1rem;">Actualiser le journal</button>');
+    refreshBtn.addEventListener("click", function(){ logOut.textContent = APP_LOG.join("\n"); logOut.scrollTop = logOut.scrollHeight; });
+    panel.appendChild(refreshBtn);
+    panel.appendChild(el('<div style="font-size:.82rem; color:var(--ink-soft); text-align:center;">Retourne jouer un niveau (touche 🔊 quelque part), puis reviens ici et appuie sur "Actualiser le journal" — envoie-moi une capture.</div>'));
+
+    panel.appendChild(el('<hr style="border:none; border-top:1px solid var(--line); width:100%;">'));
+    panel.appendChild(el('<div style="font-weight:800; font-family:\'Baloo 2\';">Diagnostic son</div>'));
+    var btn = el('<button class="icon-btn-lg primary" style="font-size:1.1rem;">Lancer le test</button>');
+    var out = el('<pre style="white-space:pre-wrap; word-break:break-word; background:var(--bg-sunken); border:1px solid var(--line); border-radius:12px; padding:12px; font-size:.78rem; line-height:1.5; max-height:50vh; overflow:auto;">(appuie sur le bouton ci-dessus)</pre>');
+
+    btn.addEventListener("click", function(){
+      var lines = [];
+      function log(s){ lines.push(s); out.textContent = lines.join("\n"); }
+      out.textContent = "";
+      log("UA: " + navigator.userAgent);
+      log("standalone: " + (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+      log("speechSynthesis dispo: " + ("speechSynthesis" in window));
+      log("Audio dispo: " + (typeof window.Audio));
+      log("--- Test lecture audio/word-loup.mp3 ---");
+      try{
+        var a = new Audio("audio/word-loup.mp3");
+        log("URL résolue: " + a.src);
+        a.addEventListener("loadedmetadata", function(){ log("loadedmetadata, durée=" + a.duration.toFixed(2) + "s"); });
+        a.addEventListener("canplay", function(){ log("canplay OK"); });
+        a.addEventListener("playing", function(){ log("EN COURS DE LECTURE (tu devrais entendre 'loup')"); });
+        a.addEventListener("stalled", function(){ log("stalled (chargement bloqué)"); });
+        a.addEventListener("error", function(){
+          var err = a.error;
+          var codes = {1:"ABORTED",2:"NETWORK",3:"DECODE",4:"SRC_NOT_SUPPORTED"};
+          log("ERREUR audio, code=" + (err && err.code) + " (" + (err && codes[err.code]) + ")");
+        });
+        a.addEventListener("ended", function(){ log("lecture terminée normalement"); });
+        var p = a.play();
+        log("play() appelé, promesse=" + (p ? "oui" : "non"));
+        if(p && p.then){
+          p.then(function(){ log("promesse RÉSOLUE (lecture démarrée)"); })
+           .catch(function(err){ log("promesse REJETÉE: " + err + " / name=" + (err && err.name) + " message=" + (err && err.message)); });
+        }
+      }catch(e){ log("Exception audio: " + e); }
+
+      log("--- Test synthèse vocale ---");
+      try{
+        log("voix dispo au départ: " + speechSynthesis.getVoices().length);
+        var u = new SpeechSynthesisUtterance("test");
+        u.lang = "fr-FR";
+        u.onstart = function(){ log("TTS onstart (ça parle)"); };
+        u.onend = function(){ log("TTS onend"); };
+        u.onerror = function(ev){ log("TTS onerror: " + ev.error); };
+        speechSynthesis.speak(u);
+        log("speechSynthesis.speak() appelé");
+        setTimeout(function(){
+          log("voix dispo après 1s: " + speechSynthesis.getVoices().length);
+          log("speaking=" + speechSynthesis.speaking + " pending=" + speechSynthesis.pending + " paused=" + speechSynthesis.paused);
+        }, 1000);
+      }catch(e){ log("Exception TTS: " + e); }
+    });
+
+    panel.appendChild(btn);
+    panel.appendChild(out);
+    panel.appendChild(el('<div style="font-size:.82rem; color:var(--ink-soft); text-align:center;">Envoie une capture d’écran de ce texte.</div>'));
+    return panel;
+  }
+
+  /* ---------- GATE (unlock audio) ---------- */
+  function gateView(){
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; min-height:80vh; cursor:pointer;";
+    var m = document.createElement("div");
+    m.style.cssText = "width:180px; height:180px;";
+    m.innerHTML = mascotSVG("happy");
+    var tap = document.createElement("div");
+    tap.style.cssText = "font-size:2.6rem; animation: bounce 1.2s ease-in-out infinite;";
+    tap.textContent = "👉";
+    wrap.appendChild(m);
+    wrap.appendChild(tap);
+    wrap.appendChild(el('<div class="sr-only">Touche l’écran pour commencer</div>'));
+    wrap.addEventListener("click", function(){
+      audioUnlocked = true;
+      setScreen({ name:"map" });
+    });
+    return wrap;
+  }
+
+  /* ---------- NARRATION ---------- */
+  function narrateForScreen(){
+    alog("narrateForScreen() écran=" + screen.name + " audioUnlocked=" + audioUnlocked);
+    if(!audioUnlocked) return;
+    if(screen.name === "map"){
+      var items = [];
+      if(!greeted){ items.push({ key:"phrase-welcome", fallback:"Salut ! Moi c'est Filou." }); greeted = true; }
+      items.push({ key:"phrase-mapcue", fallback:"Touche une pierre pour jouer !" });
+      speakKeySequence(items);
+    } else if(screen.name === "intro"){
+      var lv = LEVELS[screen.levelIdx];
+      var sample = lv.words[0];
+      speakKeySequence([
+        { key: graphemeKey(lv.g), fallback: lv.g },
+        { key: "phrase-commedans", fallback: "comme dans" },
+        { key: wordKey(sample.w), fallback: sample.w }
+      ]);
+    } else if(screen.name === "exercise"){
+      narrateQuestion();
+    } else if(screen.name === "complete"){
+      if(screen.stars >= 3) speakKey("phrase-level3", "Bravo, trois étoiles ! Tu es un champion !");
+      else if(screen.stars === 2) speakKey("phrase-level2", "Bien joué, deux étoiles !");
+      else speakKey("phrase-level1", "Bravo, tu as fini ce niveau !");
+    }
+  }
+
+  function narrateQuestion(){
+    var q = session.questions[session.qi];
+    if(q.type === "sound"){
+      speakKeySequence([
+        { key: wordKey(q.word.w), fallback: q.word.w },
+        { key: "phrase-asksound", fallback: "Quel son entends-tu ?" }
+      ]);
+    } else {
+      speakKeySequence([
+        { key: wordKey(q.word.w), fallback: q.word.w },
+        { key: "phrase-touchletters", fallback: "Touche les lettres de ce son." }
+      ]);
+    }
+  }
+
+  /* ---------- MAP ---------- */
+  function mapView(){
+    var frag = document.createDocumentFragment();
+    var trail = el('<div class="trail"><div class="trail-line"></div></div>');
+    var sides = ["c","l","r"];
+    LEVELS.forEach(function(lv, i){
+      var locked = i >= state.unlocked;
+      var row = el('<div class="trail-node-row side-' + sides[i % 3] + '"></div>');
+      var node = document.createElement("button");
+      node.className = "node" + (locked ? " locked" : "");
+      node.disabled = locked;
+      node.setAttribute("aria-label", locked ? "Niveau verrouillé" : lv.g);
+      var circle = document.createElement("div");
+      circle.className = "node-circle";
+      if(locked){
+        circle.style.background = "";
+        circle.innerHTML = '<span class="node-lock">🔒</span>';
+      } else {
+        circle.style.background = levelColor(i);
+        circle.textContent = lv.g;
+      }
+      node.appendChild(circle);
+      var st = starsFor(i);
+      var starsHtml = "";
+      for(var s=0; s<3; s++){ starsHtml += s < st ? "⭐" : "☆"; }
+      node.appendChild(el('<div class="node-stars" style="color:' + (locked ? "var(--ink-soft)" : "var(--gold)") + '">' + (locked ? "" : starsHtml) + '</div>'));
+      if(!locked){
+        node.addEventListener("click", function(){ setScreen({ name:"intro", levelIdx:i }); });
+      }
+      row.appendChild(node);
+      trail.appendChild(row);
+    });
+    frag.appendChild(trail);
+    return frag;
+  }
+
+  /* ---------- INTRO ---------- */
+  function introView(levelIdx){
+    var lv = LEVELS[levelIdx];
+    var panel = el('<div class="panel"></div>');
+
+    var back = el('<div class="back-row"><button class="icon-btn" aria-label="Retour">←</button></div>');
+    back.querySelector("button").addEventListener("click", function(){ setScreen({ name:"map" }); });
+    panel.appendChild(back);
+
+    var hero = el('<div class="grapheme-hero"></div>');
+    var big = el('<div class="grapheme-big"></div>');
+    big.style.color = levelColor(levelIdx);
+    lv.g.split("").forEach(function(ch){
+      var span = document.createElement("span");
+      span.className = "grapheme-letter";
+      span.style.background = "color-mix(in srgb, " + levelColor(levelIdx) + " 16%, transparent)";
+      span.textContent = ch;
+      big.appendChild(span);
+    });
+    hero.appendChild(big);
+    panel.appendChild(hero);
+
+    var sample = lv.words[0];
+    var range = targetRange(sample.w, lv.g);
+    var exampleRow = el('<div class="example-word-row"></div>');
+    exampleRow.appendChild(el('<div class="example-emoji">' + sample.e + '</div>'));
+    exampleRow.appendChild(el('<div class="example-word">' + markWord(sample.w, range) + '</div>'));
+    panel.appendChild(exampleRow);
+
+    var listenBtn = el('<button class="listen-btn" aria-label="Écouter">🔊</button>');
+    listenBtn.addEventListener("click", function(){
+      speakKeySequence([
+        { key: graphemeKey(lv.g), fallback: lv.g },
+        { key: "phrase-commedans", fallback: "comme dans" },
+        { key: wordKey(sample.w), fallback: sample.w }
+      ]);
+    });
+    panel.appendChild(listenBtn);
+
+    var startBtn = el('<button class="icon-btn-lg primary" aria-label="Commencer">🚀</button>');
+    startBtn.addEventListener("click", function(){ startExercises(levelIdx); });
+    panel.appendChild(startBtn);
+
+    return panel;
+  }
+
+  function markWord(word, range){
+    var out = "";
+    for(var i=0;i<word.length;i++){
+      if(i === range.start) out += "<mark>";
+      out += word[i];
+      if(i === range.end) out += "</mark>";
+    }
+    return out;
+  }
+
+  /* ---------- EXERCISE ENGINE ---------- */
+  var session = null; // { levelIdx, questions:[], qi, correctFirstTry, attempted }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
+    }
+    return a;
+  }
+
+  function startExercises(levelIdx){
+    var lv = LEVELS[levelIdx];
+    var pool = shuffle(lv.words);
+    var types = ["sound","letters","sound","letters","sound","letters"];
+    var questions = [];
+    for(var i=0;i<6;i++){
+      questions.push({ type: types[i], word: pool[i % pool.length] });
+    }
+    session = { levelIdx:levelIdx, questions:questions, qi:0, correctFirstTry:0, attempted:false };
+    setScreen({ name:"exercise" });
+  }
+
+  function progressDots(){
+    var row = el('<div class="progress-dots"></div>');
+    row.style.flex = "1";
+    session.questions.forEach(function(_, i){
+      var cls = i < session.qi ? "done" : (i === session.qi ? "current" : "");
+      row.appendChild(el('<span class="' + cls + '"></span>'));
+    });
+    return row;
+  }
+
+  function exerciseView(){
+    var lv = LEVELS[session.levelIdx];
+    var q = session.questions[session.qi];
+    var panel = el('<div class="panel"></div>');
+
+    var back = el('<div class="back-row"></div>');
+    var backBtn = el('<button class="icon-btn" aria-label="Quitter">←</button>');
+    backBtn.addEventListener("click", function(){ setScreen({ name:"map" }); });
+    back.appendChild(backBtn);
+    back.appendChild(progressDots());
+    panel.appendChild(back);
+
+    session.attempted = false;
+
+    if(q.type === "sound") panel.appendChild(soundQuestion(q, lv));
+    else panel.appendChild(lettersQuestion(q, lv));
+
+    return panel;
+  }
+
+  function feedbackArea(){ return el('<div class="fb-wrap"></div>'); }
+
+  function showFeedback(wrap, good){
+    wrap.innerHTML = "";
+    var b = el('<div class="feedback-bubble"><span class="feedback-emoji">' + (good ? "🎉" : "🙈") + '</span></div>');
+    wrap.appendChild(b);
+  }
+
+  function nextButton(){
+    var isLast = session.qi >= session.questions.length - 1;
+    var btn = el('<button class="icon-btn-lg primary" aria-label="Suivant">' + (isLast ? "⭐" : "➡️") + '</button>');
+    btn.addEventListener("click", function(){
+      if(isLast) finishLevel();
+      else { session.qi++; setScreen({ name:"exercise" }); }
+    });
+    return btn;
+  }
+
+  function registerResult(correctOnFirstTry){
+    if(correctOnFirstTry) session.correctFirstTry++;
+    state.coins += correctOnFirstTry ? 10 : 4;
+    saveState();
+  }
+
+  // --- Type A: "quel son entends-tu ?"
+  function soundQuestion(q, lv){
+    var box = document.createElement("div");
+    box.style.display = "flex"; box.style.flexDirection = "column"; box.style.gap = "16px";
+
+    var row = el('<div class="example-word-row"></div>');
+    row.appendChild(el('<div class="example-emoji" style="font-size:4.2rem;">' + q.word.e + '</div>'));
+    box.appendChild(row);
+
+    var listenBtn = el('<button class="listen-btn" aria-label="Écouter">🔊</button>');
+    listenBtn.addEventListener("click", function(){ speakKey(wordKey(q.word.w), q.word.w); });
+    box.appendChild(listenBtn);
+
+    var options = shuffle([lv.g].concat(lv.distractors));
+    var grid = el('<div class="options-grid"></div>');
+    var fb = feedbackArea();
+    var answered = false;
+
+    options.forEach(function(g){
+      var b = el('<button class="option-btn"><span class="opt-grapheme">' + g + '</span></button>');
+      b.addEventListener("click", function(){
+        if(answered) return;
+        var isCorrect = g === lv.g;
+        if(isCorrect){
+          answered = true;
+          b.classList.add("correct");
+          Array.prototype.forEach.call(grid.children, function(c){ c.disabled = true; });
+          registerResult(!session.attempted);
+          speakKey("phrase-correct", "Oui ! Bravo !");
+          showFeedback(fb, true);
+          fb.appendChild(nextButton());
+        } else {
+          b.classList.add("incorrect");
+          b.disabled = true;
+          session.attempted = true;
+          speakKey("phrase-retry", "Essaie encore !");
+          showFeedback(fb, false);
+        }
+      });
+      grid.appendChild(b);
+    });
+
+    box.appendChild(grid);
+    box.appendChild(fb);
+    return box;
+  }
+
+  // --- Type B: "montre les lettres"
+  function lettersQuestion(q, lv){
+    var box = document.createElement("div");
+    box.style.display = "flex"; box.style.flexDirection = "column"; box.style.gap = "14px";
+
+    var row = el('<div class="example-word-row"></div>');
+    row.appendChild(el('<div class="example-emoji">' + q.word.e + '</div>'));
+    box.appendChild(row);
+
+    var range = targetRange(q.word.w, lv.g);
+    var lettersRow = el('<div class="letters-row"></div>');
+    var selected = [];
+    var solved = false;
+    var wrongCount = 0;
+
+    var chars = q.word.w.split("");
+    var tiles = chars.map(function(ch, i){
+      var tile = el('<button class="letter-tile">' + ch + '</button>');
+      tile.addEventListener("click", function(){
+        if(solved) return;
+        var idx = selected.indexOf(i);
+        if(idx >= 0){ selected.splice(idx,1); tile.classList.remove("selected"); }
+        else { selected.push(i); tile.classList.add("selected"); }
+      });
+      lettersRow.appendChild(tile);
+      return tile;
+    });
+    box.appendChild(lettersRow);
+
+    var listenBtn = el('<button class="listen-btn" aria-label="Écouter">🔊</button>');
+    listenBtn.addEventListener("click", function(){ speakKey(wordKey(q.word.w), q.word.w); });
+    box.appendChild(listenBtn);
+
+    var fb = feedbackArea();
+    var checkBtn = el('<button class="icon-btn-lg secondary" aria-label="Valider">✓</button>');
+    checkBtn.addEventListener("click", function(){
+      if(solved) return;
+      var got = selected.slice().sort(function(a,b){return a-b;});
+      var want = [];
+      for(var i=range.start;i<=range.end;i++) want.push(i);
+      var ok = got.length === want.length && got.every(function(v,i){ return v === want[i]; });
+      if(ok){
+        solved = true;
+        want.forEach(function(i){ tiles[i].classList.remove("selected"); tiles[i].classList.add("locked-correct"); });
+        checkBtn.remove();
+        registerResult(!session.attempted);
+        speakKey("phrase-found", "Bravo, tu as trouvé !");
+        showFeedback(fb, true);
+        fb.appendChild(nextButton());
+      } else {
+        session.attempted = true;
+        wrongCount++;
+        selected = [];
+        tiles.forEach(function(t){ t.classList.remove("selected"); });
+        if(wrongCount >= 2){
+          want.forEach(function(i){ tiles[i].classList.add("hint"); });
+          speakKey("phrase-hint", "Regarde les lettres en jaune !");
+        } else {
+          speakKey("phrase-retry", "Essaie encore !");
+        }
+        showFeedback(fb, false);
+      }
+    });
+    box.appendChild(checkBtn);
+    box.appendChild(fb);
+    return box;
+  }
+
+  function finishLevel(){
+    var levelIdx = session.levelIdx;
+    var correct = session.correctFirstTry;
+    var total = session.questions.length;
+    var stars = 1;
+    if(correct >= total) stars = 3;
+    else if(correct >= total - 2) stars = 2;
+
+    var prevStars = state.stars[levelIdx] || 0;
+    if(stars > prevStars){
+      state.stars[levelIdx] = stars;
+      state.coins += (stars - prevStars) * 15;
+    }
+    if(levelIdx + 1 > state.unlocked && levelIdx + 1 < LEVELS.length + 1){
+      state.unlocked = Math.max(state.unlocked, levelIdx + 1);
+    }
+    saveState();
+    setScreen({ name:"complete", levelIdx:levelIdx, stars:stars, correct:correct, total:total });
+    launchConfetti();
+  }
+
+  function completeView(){
+    var panel = el('<div class="panel" style="align-items:center; text-align:center;"></div>');
+    var mascot = el('<div style="width:96px;height:96px;"></div>');
+    mascot.innerHTML = mascotSVG(screen.stars >= 2 ? "happy" : "idle");
+    panel.appendChild(mascot);
+
+    var starsRow = el('<div class="stars-row"></div>');
+    for(var i=0;i<3;i++){
+      starsRow.appendChild(el('<span class="' + (i < screen.stars ? "lit" : "") + '">⭐</span>'));
+    }
+    panel.appendChild(starsRow);
+
+    panel.appendChild(el('<div class="coin-gain">🪙 ' + state.coins + '</div>'));
+
+    var isLastLevel = screen.levelIdx === LEVELS.length - 1;
+    var nextBtn;
+    if(!isLastLevel){
+      nextBtn = el('<button class="icon-btn-lg primary" aria-label="Niveau suivant">▶️</button>');
+      nextBtn.addEventListener("click", function(){ setScreen({ name:"intro", levelIdx: screen.levelIdx + 1 }); });
+    } else {
+      nextBtn = el('<button class="icon-btn-lg primary" aria-label="Retour à la carte">🗺️</button>');
+      nextBtn.addEventListener("click", function(){ setScreen({ name:"map" }); });
+    }
+    panel.appendChild(nextBtn);
+
+    var retryBtn = el('<button class="icon-btn-lg secondary" aria-label="Recommencer">🔁</button>');
+    retryBtn.addEventListener("click", function(){ startExercises(screen.levelIdx); });
+    panel.appendChild(retryBtn);
+
+    var mapBtn = el('<button class="icon-btn-lg ghost" aria-label="Carte">🏠</button>');
+    mapBtn.addEventListener("click", function(){ setScreen({ name:"map" }); });
+    panel.appendChild(mapBtn);
+
+    return panel;
+  }
+
+  function launchConfetti(){
+    var layer = document.getElementById("confetti-layer");
+    var colors = LEVEL_HUES;
+    for(var i=0;i<28;i++){
+      var c = document.createElement("div");
+      c.className = "confetto";
+      c.style.left = (Math.random()*100) + "vw";
+      c.style.background = colors[i % colors.length];
+      c.style.animationDuration = (1.4 + Math.random()*1.2) + "s";
+      c.style.animationDelay = (Math.random()*0.4) + "s";
+      layer.appendChild(c);
+      (function(node){ setTimeout(function(){ node.remove(); }, 3200); })(c);
+    }
+  }
+
+  /* ================= BOOT / HOT STATE ================= */
+  function boot(saved){
+    if(saved && saved.state) state = saved.state;
+    render();
+  }
+  if(window.claude && window.claude.hot && window.claude.hot.snapshot){
+    window.claude.hot.snapshot(function(){ return { state: state }; });
+  }
+  if(window.claude && window.claude.hot && window.claude.hot.ready){
+    window.claude.hot.ready(boot);
+  } else {
+    boot(window.claude && window.claude.hot ? window.claude.hot.data : null);
+  }
+})();
+</script>
